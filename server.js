@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
 const app = express();
@@ -24,7 +24,7 @@ if (!GEMINI_API_KEY) {
 }
 
 // Inicializar Gemini
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -64,13 +64,13 @@ app.post('/api/gemini', async (req, res) => {
         }
 
         // Llamar a Gemini
-        const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
-            contents: prompt,
-        });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
 
         // Validar respuesta
-        if (!response || !response.text) {
+        if (!text) {
             throw new Error('Respuesta vacía de Gemini');
         }
 
@@ -78,7 +78,7 @@ app.post('/api/gemini', async (req, res) => {
         console.log(`✅ Gemini API exitosa - Prompt length: ${prompt.length} chars`);
 
         res.json({ 
-            text: response.text,
+            text: text,
             model: "gemini-2.0-flash",
             timestamp: new Date().toISOString()
         });
