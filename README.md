@@ -1,22 +1,22 @@
-# Proxy Gemini para Render
+# Gemini API Proxy
 
-Proxy simple para la API de Gemini desplegado en Render.
+A simple Node.js proxy to securely use the Google Gemini API by keeping your API key on the server. Ideal for personal AI projects and easy to deploy on Google Cloud Run.
 
-## Variables de Entorno Requeridas
+## Required Setup
 
-En Render, configura estas variables de entorno:
+### Environment Variables
 
-- `GEMINI_API_KEY`: Tu clave de API de Google Gemini
-- `ALLOWED_ORIGINS`: Dominios permitidos (opcional, por defecto incluye Firebase)
+* `GEMINI_API_KEY` **(Required)**: Your Google Gemini API key.
+* `ALLOWED_ORIGINS` (Optional): Comma-separated domains for CORS.
 
 ## Endpoints
 
-- `POST /api/gemini`: Proxy principal para Gemini
-- `GET /health`: Health check
+#### `GET /health`
+A health check endpoint to confirm the service is online.
 
-## Despliegue en Render
-
-1. Conecta tu repositorio de GitHub
-2. Configura las variables de entorno
-3. Render detectará automáticamente que es Node.js
-4. El servicio estará disponible en la URL que te proporcione Render 
+#### `POST /api/gemini`
+Proxies requests to the Gemini API. Send a JSON body with a `prompt`:
+```json
+{
+  "prompt": "Your text prompt here"
+}
