@@ -8,7 +8,13 @@ const PORT = process.env.PORT || 3000;
 
 // CORS configurado para tu dominio
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['https://personal-webpage-ab7ec.web.app', 'https://personal-webpage-ab7ec.firebaseapp.com', 'https://hassirlastre.com'],
+    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
+        'https://react-personal-website-f59ef.web.app', 
+        'https://react-personal-website-f59ef.firebaseapp.com', 
+        'https://hassirlastre.com',
+        'http://localhost:4173',
+        'http://localhost:5173'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
