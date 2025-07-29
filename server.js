@@ -6,19 +6,53 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configurado para tu dominio
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
+// Configurar orígenes permitidos
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+    : [
         'https://react-personal-website-f59ef.web.app', 
         'https://react-personal-website-f59ef.firebaseapp.com', 
         'https://hassirlastre.com',
         'http://localhost:4173',
         'http://localhost:5173'
-    ],
+    ];
+
+console.log('🌍 CORS - Orígenes permitidos:', allowedOrigins);
+
+// CORS configurado con debugging
+const corsOptions = {
+    origin: function (origin, callback) {
+        console.log(`🔍 CORS Origin Check - Received: "${origin}"`);
+        
+        // Permitir requests sin origin (ej: aplicaciones móviles, Postman)
+        if (!origin) {
+            console.log('✅ CORS - Sin origin, permitido');
+            return callback(null, true);
+        }
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            console.log(`✅ CORS - Origin "${origin}" permitido`);
+            callback(null, true);
+        } else {
+            console.log(`❌ CORS - Origin "${origin}" NO permitido`);
+            console.log(`📋 Orígenes válidos: ${allowedOrigins.join(', ')}`);
+            callback(new Error('No permitido por política CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
+// Middleware de debugging para ver headers
+app.use((req, res, next) => {
+    console.log(`📥 ${req.method} ${req.path} - Origin: "${req.get('Origin') || 'sin origin'}"`);
+    next();
+});
 
 app.use(express.json({ limit: '1mb' }));
 
@@ -40,6 +74,24 @@ app.get('/health', (req, res) => {
         environment: process.env.NODE_ENV || 'production',
         version: '1.0.0'
     });
+});
+
+// CORS test endpoint - para debugging
+app.get('/cors-test', (req, res) => {
+    const origin = req.get('Origin');
+    console.log(`🧪 CORS Test - Origin: "${origin}"`);
+    res.json({ 
+        message: 'CORS test successful',
+        receivedOrigin: origin || 'sin origin',
+        allowedOrigins: allowedOrigins,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// OPTIONS test para debugging preflight
+app.options('/cors-test', (req, res) => {
+    console.log('🔧 OPTIONS preflight para /cors-test');
+    res.status(204).send();
 });
 
 // Endpoint principal de Gemini
