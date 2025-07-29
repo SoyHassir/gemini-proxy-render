@@ -36,7 +36,7 @@ const corsOptions = {
         } else {
             console.log(`❌ CORS - Origin "${origin}" NO permitido`);
             console.log(`📋 Orígenes válidos: ${allowedOrigins.join(', ')}`);
-            callback(new Error('No permitido por política CORS'));
+            callback(null, false); // Rechazar sin error
         }
     },
     credentials: true,
